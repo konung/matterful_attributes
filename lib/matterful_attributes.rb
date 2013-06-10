@@ -1,47 +1,46 @@
 require "matterful_attributes/version"
 
 module MatterfulAttributes
-  module ActiveRecord
-    class Base
+  extend ActiveSupport::Concern
+    # These only make sense as instance methods
+      def matterful_attributes(options={})
+        options = options.dup
+        default     = options[:default].nil?        ? true : options[:default]
+        foreign_key = options[:foreign_key].nil?    ? true : options[:foreign_key]
+        sti         = options[:sti].nil?            ? true : options[:sti]
+        polymorphic = options[:polymorphic].nil?    ? true : options[:polymorphic]
+        # extra keys supplied as array of strings to ignore in comparison
+        attributes_to_ignore = options[:extra].nil? ? []   : options[:extra]
 
-    def matterful_attributes(options={})
-      options = options.dup
-      default     = options[:default].nil?        ? true : options[:default]
-      foreign_key = options[:foreign_key].nil?    ? true : options[:foreign_key]
-      sti         = options[:sti].nil?            ? true : options[:sti]
-      polymorphic = options[:polymorphic].nil?    ? true : options[:polymorphic]
-      # extra keys supplied as array of strings to ignore in comparison
-      attributes_to_ignore = options[:extra].nil? ? []   : options[:extra]
-
-      # Let's check for and add typical attributes that sti & polymorphic models have, override
-      # this by sti: false, polymorphic: false, :foreign_key: false
-      # by default when looking to compare two objects
-      # Customer.find(1).shipping_address.same_as? Address.new(city: 'Chicago')
-      # we really only want to see if any of the 'matterfule information changed', like address_line_1 or city.
-      # TODO: I guess I could do some smart checking on the model to see what kind of attributes it has.
-      # For now we'll just check for all that we want to remove
-      if default
-        attributes_to_ignore += ['id', 'created_at', 'updated_at']
+        # Let's check for and add typical attributes that sti & polymorphic models have, override
+        # this by sti: false, polymorphic: false, :foreign_key: false
+        # by default when looking to compare two objects
+        # Customer.find(1).shipping_address.same_as? Address.new(city: 'Chicago')
+        # we really only want to see if any of the 'matterfule information changed', like address_line_1 or city.
+        # TODO: I guess I could do some smart checking on the model to see what kind of attributes it has.
+        # For now we'll just check for all that we want to remove
+        if default
+          attributes_to_ignore += ['id', 'created_at', 'updated_at']
+        end
+        # By default we want foreign keys like caegory_id as they provide useful information about current record.
+        # Let's say you import a bunch of addresses
+        # and they ony matterful change was from shipping to billing category.
+        unless foreign_key
+          # This will skip polymorphic style foreign keys and only deal with belongs_to style keys
+          attributes_to_ignore += attributes.keys.keep_if{|k| k.match(/_id\z/) && !k.match(/able_id\z/) }
+        end
+        if sti
+          attributes_to_ignore += ['type']
+        end
+        # If you are looking at a model that is polymorphic than most like you want to update something
+        # like city for an Address , not addressable_id or addresable_type
+        # That is more likely type of information to be updated on external import.
+        if polymorphic
+          attributes_to_ignore += attributes.keys.keep_if{|k| k.match(/able_id\z/) }
+          attributes_to_ignore += attributes.keys.keep_if{|k| k.match(/able_type\z/) }
+        end
+        attributes.except(*attributes_to_ignore)
       end
-      # By default we want foreign keys like caegory_id as they provide useful information about current record.
-      # Let's say you import a bunch of addresses
-      # and they ony matterful change was from shipping to billing category.
-      unless foreign_key
-        # This will skip polymorphic style foreign keys and only deal with belongs_to style keys
-        attributes_to_ignore += attributes.keys.keep_if{|k| k.match(/_id\z/) && !k.match(/able_id\z/) }
-      end
-      if sti
-        attributes_to_ignore += ['type']
-      end
-      # If you are looking at a model that is polymorphic than most like you want to update something
-      # like city for an Address , not addressable_id or addresable_type
-      # That is more likely type of information to be updated on external import.
-      if polymorphic
-        attributes_to_ignore += attributes.keys.keep_if{|k| k.match(/able_id\z/) }
-        attributes_to_ignore += attributes.keys.keep_if{|k| k.match(/able_type\z/) }
-      end
-      attributes.except(*attributes_to_ignore)
-    end
 
       def same_as?(source,options={})
         matterful_attributes(options) == source.matterful_attributes(options)
@@ -68,7 +67,8 @@ module MatterfulAttributes
         self.matterful_update(source,options={})
         save
       end
-
-    end
-  end
 end
+
+# include the extension
+ActiveRecord::Base.send(:include, MatterfulAttributes)
+
