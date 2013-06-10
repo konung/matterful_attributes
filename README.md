@@ -47,8 +47,8 @@ matterful_attributes( source,
                              })
 
 # Do comparison of two similar Records for attributes that matter. Returns a hash of attributes that will be updated with the information that will update it
-matterful_diff(source , optons
-                      ={ default:true,
+matterful_diff(source ,
+                optons={ default:true,
                                sti: true,
                                polymorphic: true,
                                foreign_key: true,
@@ -56,8 +56,7 @@ matterful_diff(source , optons
                              })
 
 # Diff and update target from source. Returns self. with updated attributes, but doesn't save!!!
-matterful_update(sour ce, opto
-                      ns={ default:true,
+matterful_update(source, options={ default:true,
                                sti: true,
                                polymorphic: true,
                                foreign_key: true,
@@ -65,8 +64,7 @@ matterful_update(sour ce, opto
                              })
 
 # Same as matterful_update but also saves self. right away if valid. Returns true / false.
-matterful_update!(sou rce, opt
-                      ons={ default:true,
+matterful_update!(source, options={ default:true,
                                sti: true,
                                polymorphic: true,
                                foreign_key: true,
@@ -74,8 +72,7 @@ matterful_update!(sou rce, opt
                              })
 
 # I decided not to overload standard comparison operators to avoid confusion. hence this. Returns true or false
-same_as?(source, opto ns={ def
-                      ault:true,
+same_as?(source, options={ default:true,
                                sti: true,
                                polymorphic: true,
                                foreign_key: true,
