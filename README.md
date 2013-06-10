@@ -46,7 +46,8 @@ matterful_attributes( source,
                                extra: ['Array', 'of extra', 'attributes', 'to ignore as strings']
                              })
 
-# Do comparison of two similar Records for attributes that matter. Returns a hash of attributes that will be updated with the information that will update it
+# Do comparison of two similar Records for attributes that matter. Returns a
+# hash of attributes that will be updated with the information that will update it
 matterful_diff(source ,
                 optons={ default:true,
                                sti: true,
