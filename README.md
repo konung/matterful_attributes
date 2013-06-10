@@ -42,7 +42,7 @@ matterful_attributes( source,
                       optons={ default:true,
                                sti: true,
                                polymorphic: true,
-                               foreign_key:true,
+                               foreign_key: true,
                                extra: ['Array', 'of extra', 'attributes', 'to ignore as strings']
                              })
 
@@ -51,7 +51,7 @@ matterful_diff(source , optons
                       ={ default:true,
                                sti: true,
                                polymorphic: true,
-                               foreign_key:true,
+                               foreign_key: true,
                                extra: ['Array', 'of extra', 'attributes', 'to ignore as strings']
                              })
 
@@ -60,7 +60,7 @@ matterful_update(sour ce, opto
                       ns={ default:true,
                                sti: true,
                                polymorphic: true,
-                               foreign_key:true,
+                               foreign_key: true,
                                extra: ['Array', 'of extra', 'attributes', 'to ignore as strings']
                              })
 
@@ -69,7 +69,7 @@ matterful_update!(sou rce, opt
                       ons={ default:true,
                                sti: true,
                                polymorphic: true,
-                               foreign_key:true,
+                               foreign_key: true,
                                extra: ['Array', 'of extra', 'attributes', 'to ignore as strings']
                              })
 
@@ -78,7 +78,7 @@ same_as?(source, opto ns={ def
                       ault:true,
                                sti: true,
                                polymorphic: true,
-                               foreign_key:true,
+                               foreign_key: true,
                                extra: ['Array', 'of extra', 'attributes', 'to ignore as strings']
                              })
 ```
