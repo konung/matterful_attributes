@@ -25,3 +25,115 @@ This was extracted from production code that's tested. However use at your own r
 Tests
 =====
 This gem needs tests! It's tested in the context of my production code, but no gem specific tests. I'll add them later if time allows. Really bad practice, I know, but I'm really short on time.
+I suggest you check out this answer on stackoverflow: http://stackoverflow.com/a/13156750/198424
+
+Usage
+=====
+Using Gemfile:
+
+```ruby
+gem 'matterful_attributes', require: 'matterful_attributes'
+```
+
+Available methods
+```ruby
+# List attributes that matter to humans
+matterful_attributes( source,
+                      optons={ default:true,
+                               sti: true,
+                               polymorphic: true,
+                               foreign_key:true,
+                               extra: ['Array', 'of extra', 'attributes', 'to ignore as strings']
+                             })
+
+# Do comparison of two similar Records for attributes that matter. Returns a hash of attributes that will be updated with the information that will update it
+matterful_diff(source , optons
+                      ={ default:true,
+                               sti: true,
+                               polymorphic: true,
+                               foreign_key:true,
+                               extra: ['Array', 'of extra', 'attributes', 'to ignore as strings']
+                             })
+
+# Diff and update target from source. Returns self. with updated attributes, but doesn't save!!!
+matterful_update(sour ce, opto
+                      ns={ default:true,
+                               sti: true,
+                               polymorphic: true,
+                               foreign_key:true,
+                               extra: ['Array', 'of extra', 'attributes', 'to ignore as strings']
+                             })
+
+# Same as matterful_update but also saves self. right away if valid. Returns true / false.
+matterful_update!(sou rce, opt
+                      ons={ default:true,
+                               sti: true,
+                               polymorphic: true,
+                               foreign_key:true,
+                               extra: ['Array', 'of extra', 'attributes', 'to ignore as strings']
+                             })
+
+# I decided not to overload standard comparison operators to avoid confusion. hence this. Returns true or false
+same_as?(source, opto ns={ def
+                      ault:true,
+                               sti: true,
+                               polymorphic: true,
+                               foreign_key:true,
+                               extra: ['Array', 'of extra', 'attributes', 'to ignore as strings']
+                             })
+```
+
+!!! Attention
+Foreign_keys such as category_id are by default not ignored pass foreign_key: false to ignore them. See example below.
+
+
+Now all your models have matterful INSTANCE methods. These methods only make sence to use in an instance of Address.first, no in Address  as class by itself doesn't hod any information that matters to humans: sucha s when you import CSV data you are going to update a very specific record, not some abstract Address.
+
+```ruby
+# Assuming you have an Address model like so
+class Address < ActiveRecord::Base {
+                  :id => :integer,
+      :address_line_1 => :string,
+      :address_line_2 => :string,
+      :address_line_3 => :string,
+                :city => :string,
+               :state => :string,
+                 :zip => :string,
+             :country => :string,
+                :attn => :string,
+         :category_id => :integer,
+      :addressable_id => :integer,
+    :addressable_type => :string,
+          :created_at => :datetime,
+          :updated_at => :datetime
+}
+```
+
+```ruby
+# List matterful attributes, without foreign_keys like category_id
+Address.first.matterful_attributes(foreign_keys: false)
+
+# Returns hash like so
+# {"address_line_1"=>"300 Sample Drive",
+# "address_line_2"=>nil,
+# "address_line_3"=>nil,
+# "city"=>"Buffalo Grove",
+# "state"=>"IL",
+# "zip"=>"60089",
+# "country"=>"USA",
+# "attn"=>nil}
+
+# List matterful attributes, without foreign_keys like category_id
+Address.first.matterful_diff(Address.last)
+
+# Returns hash like so
+# {"address_line_1"=>"300 Sample Drive",
+# "address_line_2"=>nil,
+# "address_line_3"=>nil,
+# "city"=>"Buffalo Grove",
+# "state"=>"IL",
+# "zip"=>"60089",
+# "country"=>"USA",
+# "attn"=>nil}
+
+```
