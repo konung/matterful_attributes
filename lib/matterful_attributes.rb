@@ -49,7 +49,6 @@ module MatterfulAttributes
         # Since this gem is used only in the context of ActiveRecord, safe to use blank?, from ActionPack
         # KEEP IN MIND THIS THI WILL NOT CHECK for blanks in sti, foreign, and default attributes
         # it will only check for blank values in keys not in attributes_to_ignore already!!!!
-        puts compare_blank_values
         unless compare_blank_values
           attributes.except(*attributes_to_ignore).keys.each do |key|
             if self.send(key).blank?
