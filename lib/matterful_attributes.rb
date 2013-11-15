@@ -13,7 +13,7 @@ module MatterfulAttributes
         attributes_to_ignore = options[:extra].nil? ? []   : options[:extra]
 
         # Let's check for and add typical attributes that sti & polymorphic models have, override
-        # this by sti: false, polymorphic: false, :foreign_key: false
+        # this by sti: false, polymorphic: false, foreign_key: false
         # by default when looking to compare two objects
         # Customer.find(1).shipping_address.same_as? Address.new(city: 'Chicago')
         # we really only want to see if any of the 'matterfule information changed', like address_line_1 or city.
@@ -53,10 +53,17 @@ module MatterfulAttributes
       # Update self if source object has new data but DO NOT save. Let's say you want to do
       # futer processing on the new data. Validation, upcasing, concatination
       def matterful_update(source,options={})
+        options = options.dup
+        # Set ignore_nils to false only if you, want to update existing information with nil information from the new object
+        # For example, often your table has historical data, while source, may only have current. You may want to keep historical data
+        # for reference, or if some process relies on it. It's generally not a good idea to delete good data, unless you have to.
+        ignore_nils = options[:ignore_nils].nil?  ? true : options[:ignore_nils]
         # Pay attention to this! Reversing comparison to get expected results
         if !(target_attributes = source.matterful_diff(self, options={})).empty?
           target_attributes.each_pair do |k,v|
-            self[k] = v
+            if ignore_nils && v.nil?
+              self[k] = v
+            end
           end
         end
         self
