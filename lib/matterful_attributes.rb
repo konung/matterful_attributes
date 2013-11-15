@@ -11,6 +11,11 @@ module MatterfulAttributes
         polymorphic = options[:polymorphic].nil?    ? true : options[:polymorphic]
         # extra keys supplied as array of strings to ignore in comparison
         attributes_to_ignore = options[:extra].nil? ? []   : options[:extra]
+        # Set compare_blank_values to false only if you, DO NOT want to update existing information with nil information from the new object
+        # For example, sometimes your table has historical data, while source, may only have current. You may want to keep historical data
+        # for reference, or if some process relies on it. It's generally not a good idea to delete good data, unless you have to.
+        compare_blank_values = options[:compare_blank_values].nil?  ? true : options[:compare_blank_values]
+
 
         # Let's check for and add typical attributes that sti & polymorphic models have, override
         # this by sti: false, polymorphic: false, foreign_key: false
@@ -39,6 +44,18 @@ module MatterfulAttributes
           attributes_to_ignore += attributes.keys.keep_if{|k| k.match(/able_id\z/) }
           attributes_to_ignore += attributes.keys.keep_if{|k| k.match(/able_type\z/) }
         end
+
+        # This will only be invoked on blank values
+        # Since this gem is used only in the context of ActiveRecord, safe to use blank?, from ActionPack
+        # KEEP IN MIND THIS THI WILL NOT CHECK for blanks in sti, foreign, and default attributes
+        # it will only check for blank values in keys not in attributes_to_ignore already!!!!
+        unless compare_blank_values
+          attributes.except(*attributes_to_ignore).keys.each do |key|
+            if self.send(key).blank?
+              attributes_to_ignore += [key]
+            end
+          end
+        end
         attributes.except(*attributes_to_ignore)
       end
 
@@ -54,16 +71,10 @@ module MatterfulAttributes
       # futer processing on the new data. Validation, upcasing, concatination
       def matterful_update(source,options={})
         options = options.dup
-        # Set ignore_nils to false only if you, want to update existing information with nil information from the new object
-        # For example, often your table has historical data, while source, may only have current. You may want to keep historical data
-        # for reference, or if some process relies on it. It's generally not a good idea to delete good data, unless you have to.
-        ignore_nils = options[:ignore_nils].nil?  ? true : options[:ignore_nils]
         # Pay attention to this! Reversing comparison to get expected results
         if !(target_attributes = source.matterful_diff(self, options={})).empty?
           target_attributes.each_pair do |k,v|
-            if ignore_nils && v.nil?
-              self[k] = v
-            end
+            self[k] = v
           end
         end
         self
