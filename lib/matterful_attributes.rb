@@ -87,6 +87,26 @@ module MatterfulAttributes
       end
 end
 
+class Hash
+  # Extracted from :  http://api.rubyonrails.org/v4.0.2/classes/Hash.html#method-i-diff
+  # ActiveSupport::Deprecation.warn "Hash#diff is no longer used inside of
+  # Rails, and is being deprecated with no replacement. If you're using
+  # it to compare hashes for the purpose of testing, please use MiniTest's assert_equal instead."
+  # Returns a hash that represents the difference between two hashes.
+  #
+  #   {1 => 2}.diff(1 => 2)         # => {}
+  #   {1 => 2}.diff(1 => 3)         # => {1 => 2}
+  #   {}.diff(1 => 2)               # => {1 => 2}
+  #   {1 => 2, 3 => 4}.diff(1 => 2) # => {3 => 4}
+  def diff(other)
+    ActiveSupport::Deprecation.warn "Hash.diff Pulled back into Hash from  Rails 4.0.2 ."
+    dup.
+      delete_if { |k, v| other[k] == v }.
+      merge!(other.dup.delete_if { |k, v| has_key?(k) })
+  end
+end
+
+
 # include the extension
 ActiveRecord::Base.send(:include, MatterfulAttributes)
 
