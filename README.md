@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/konung/matterful_attributes.svg?branch=master)](https://travis-ci.org/konung/matterful_attributes.svg?branch=master)
+[![Gem Version](https://badge.fury.io/rb/matterful_attributes.svg)](https://badge.fury.io/rb/matterful_attributes)
+
+
 matterful_attributes
 ====================
 
